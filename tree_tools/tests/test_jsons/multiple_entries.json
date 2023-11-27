@@ -1,0 +1,12 @@
+{
+    "0": {
+        "_id": 0,
+        "name": "foo",
+        "value": "bar"
+    },
+    "1": {
+        "_id": 0,
+        "name": "fee",
+        "value": "baz"
+    }
+}
