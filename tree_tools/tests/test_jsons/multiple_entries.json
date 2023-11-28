@@ -2,11 +2,21 @@
     "0": {
         "_id": 0,
         "name": "foo",
-        "value": "bar"
+        "value": "bar",
+        "alternate_values": [
+            "BAR",
+            "barr",
+            "Bar"
+        ]
     },
     "1": {
         "_id": 0,
         "name": "fee",
-        "value": "baz"
+        "value": "baz",
+        "alternate_values": [
+            "BAZ",
+            "bash",
+            "Baz"
+        ]
     }
 }

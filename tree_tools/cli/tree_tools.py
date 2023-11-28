@@ -1,7 +1,9 @@
+
 import click
 import logging
 import json
 
+from src import jtt_tree 
 
 @click.group()
 @click.option('--debug', is_flag=True, default=False)
@@ -13,6 +15,7 @@ def cli(ctx: click.Context, debug: bool):
     ctx.obj['debug'] = debug
     
     if debug:
+        click.echo('Debug mode is on.')
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
@@ -24,11 +27,19 @@ def cli(ctx: click.Context, debug: bool):
 def load_json(ctx: click.Context, input_file: click.File):
     """Load JSON file"""
     
-    if ctx.obj['debug']:
-        click.echo("Debug mode is on, will not actually save file to a tree .")
-    
     data = json.load(input_file)
     logging.debug(data)
+    try: 
+        tree = jtt_tree.create_tree(data)
+        logging.debug(tree)
+        
+        nodes = tree.collect_by_key(['0', 'positions', 'x'])
+        logging.debug(nodes)
+        
+    except Exception as e:
+        logging.error(e)
+        
+
 
 
 if __name__ == '__main__':
