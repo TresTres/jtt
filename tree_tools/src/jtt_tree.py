@@ -111,6 +111,8 @@ class ObjectTreeNode(TreeNode):
 
 
 def create_tree(data: typing.Dict[str, typing.Any]) -> ObjectTreeNode:
+    if type(data) != dict:
+        raise ValueError(f"Invalid type: {type(data)} for value {data}")
     return ObjectTreeNode(data)
 
 
