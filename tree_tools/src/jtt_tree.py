@@ -1,5 +1,5 @@
+import math
 import enum
-import abc
 import typing
 import reprlib
 
@@ -11,18 +11,23 @@ class NodeType(enum.Enum):
     OBJECT = "OBJECT"
 
 
-class TreeNode(abc.ABC):
+class TreeNode:
     type: NodeType
     value: typing.Union[str, int, typing.List["TreeNode"], typing.Dict[str, "TreeNode"]]
     repr_object = reprlib.Repr()    
+    blob_str = "**"
     
     def __repr__(self) -> str:
         return TreeNode.repr_object.repr(self.value)
 
-    @abc.abstractmethod
-    def collect_by_key(self, path: typing.List[str]) -> typing.List["TreeNode"]:
+    def collect_path_matches(self, path: typing.List[str]) -> typing.List["TreeNode"]:
+        """
+        Collects all nodes that match the target path.
+        """
         pass
 
+
+    
 
 class StringTreeNode(TreeNode):
     type = NodeType.STRING
@@ -30,11 +35,11 @@ class StringTreeNode(TreeNode):
     def __init__(self, value: str):
         self.value = value
 
-    def collect_by_key(self, path: typing.List[str]) -> typing.List[TreeNode]:
+    def collect_path_matches(self, _path: typing.List[str]) -> typing.List[TreeNode]:
         """
         No key on this class
         """
-        return []
+        return [self]
 
 
 class IntTreeNode(TreeNode):
@@ -43,11 +48,11 @@ class IntTreeNode(TreeNode):
     def __init__(self, value: int):
         self.value = value
 
-    def collect_by_key(self, path: typing.List[str]) -> typing.List[TreeNode]:
+    def collect_path_matches(self, _path: typing.List[str]) -> typing.List[TreeNode]:
         """
         No key on this class
         """
-        return []
+        return [self]
 
 
 class ListTreeNode(TreeNode):
@@ -67,15 +72,24 @@ class ListTreeNode(TreeNode):
             else:
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
 
-    def collect_by_key(self, path: typing.List[str]) -> typing.List[TreeNode]:
+    def collect_path_matches(self, path: typing.List[str]) -> typing.List[TreeNode]:
         """
-        Iterate through children and find keys within
+        Collects all nodes that match the target path.
+        Recurse down on children with a matching index.
         """
+        if len(path) == 0:
+            return [self]
+        term = path.pop(0)
+        index = -math.inf
+        if term.isdigit():
+            index = int(term)
+        elif term != self.blob_str:
+            return []
         matching = []
-        for node in self.value:
-            matching.extend(node.collect_by_key(path.copy()))
+        for ind, node in enumerate(self.value):
+            if ind == index or term == self.blob_str:
+                matching.extend(node.collect_path_matches(path.copy()))
         return matching
-
 
 class ObjectTreeNode(TreeNode):
     type = NodeType.OBJECT
@@ -93,20 +107,20 @@ class ObjectTreeNode(TreeNode):
                 self.value[k] = ListTreeNode(v)
             else:
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
+            
 
-    def collect_by_key(self, path: typing.List[str]) -> typing.List[TreeNode]:
+    def collect_path_matches(self, path: typing.List[str]) -> typing.List[TreeNode]:
         """
-        Pop off the first element in path and search for it in the children
-        Recurse down on each child if there are more elements in path
+        Collects all nodes that match the target path.
+        Recurses down on children with a matching key.
         """
+        if len(path) == 0:
+            return [self]
         term = path.pop(0)
         matching = []
         for k, v in self.value.items():
-            if k == term:
-                if len(path) == 0:
-                    matching.append(v)
-                else:
-                    matching.extend(v.collect_by_key(path.copy()))
+            if k == term or term == self.blob_str:
+                matching.extend(v.collect_path_matches(path.copy()))
         return matching
 
 
@@ -119,4 +133,4 @@ def create_tree(data: typing.Dict[str, typing.Any]) -> ObjectTreeNode:
 def search_tree_keys(
     tree: ObjectTreeNode, path: typing.List[str]
 ) -> typing.List[TreeNode]:
-    return tree.collect_by_key(path)
+    return tree.collect_path_matches(path)

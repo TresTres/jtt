@@ -32,8 +32,9 @@ def load_json(ctx: click.Context, input_file: click.File):
     try: 
         tree = jtt_tree.create_tree(data)
         logging.debug(tree)
-        
-        nodes = tree.collect_by_key(['0', 'positions', 'x'])
+        nodes = tree.collect_path_matches(['**'])
+        logging.debug(nodes)
+        nodes = tree.collect_path_matches(['0', 'positions', '1', 'x'])
         logging.debug(nodes)
         
     except Exception as e:

@@ -1,5 +1,7 @@
 import pytest
 
+from tree_tools.src.jtt_tree import create_tree
+
 
 @pytest.fixture()
 def fixture_sample_data():
@@ -13,3 +15,7 @@ def fixture_sample_data():
         "f": [5, "6", {"g": 7}],
     }
     return data.copy()
+
+@pytest.fixture()
+def fixture_sample_tree(fixture_sample_data):
+    return create_tree(fixture_sample_data)
