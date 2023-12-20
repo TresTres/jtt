@@ -3,7 +3,7 @@ import click
 import logging
 import json
 
-from src import jtt_tree 
+from src import jtt_tree, jtt_visitor 
 
 @click.group()
 @click.option('--debug', is_flag=True, default=False)
@@ -31,17 +31,14 @@ def load_json(ctx: click.Context, input_file: click.File):
     logging.debug(data)
     try: 
         tree = jtt_tree.create_tree(data)
-        logging.debug(tree)
-        nodes = tree.collect_path_matches(['**'])
-        logging.debug(nodes)
-        nodes = tree.collect_path_matches(['0', 'positions', '1', 'x'])
-        logging.debug(nodes)
+        # logging.debug(tree)
+        
+        query = jtt_visitor.NodeQuery(tree, ['**', 'positions', '0'])
+        logging.debug(query.collect_results())
         
     except Exception as e:
         logging.error(e)
         
-
-
 
 if __name__ == '__main__':
     cli(obj={})
