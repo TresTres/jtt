@@ -1,5 +1,4 @@
 import typing
-import math
 
 from src import jtt_tree
 
@@ -7,10 +6,13 @@ class NodeVisitor:
     
     tree: jtt_tree.TreeNode
     
+    def visit_null_node(self, node: jtt_tree.NullTreeNode) -> None:
+        pass
+    
     def visit_string_node(self, node: jtt_tree.StringTreeNode) -> None:
         pass
     
-    def visit_int_node(self, node: jtt_tree.IntTreeNode) -> None:
+    def visit_number_node(self, node: jtt_tree.NumberTreeNode) -> None:
         pass
     
     def visit_array_node(self, node: jtt_tree.ListTreeNode) -> None:
@@ -42,6 +44,13 @@ class NodeQuery(NodeVisitor):
         self.tree.accept_visitor(self)
         return self.results
         
+    def visit_null_node(self, node: jtt_tree.NullTreeNode) -> None:
+        """
+        Add the node to the results if the path is empty.
+        """
+        if not self.path:
+            self.results.append(node)
+    
     def visit_string_node(self, node: jtt_tree.StringTreeNode) -> None:
         """
         Add the node to the results if the path is empty.
@@ -49,7 +58,7 @@ class NodeQuery(NodeVisitor):
         if not self.path:
             self.results.append(node)
                 
-    def visit_int_node(self, node: jtt_tree.IntTreeNode) -> None:
+    def visit_number_node(self, node: jtt_tree.NumberTreeNode) -> None:
         """
         Add the node to the results if the path is empty.
         """

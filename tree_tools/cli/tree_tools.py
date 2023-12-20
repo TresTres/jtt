@@ -28,12 +28,12 @@ def load_json(ctx: click.Context, input_file: click.File):
     """Load JSON file"""
     
     data = json.load(input_file)
-    logging.debug(data)
+    # logging.debug(data)
     try: 
         tree = jtt_tree.create_tree(data)
-        # logging.debug(tree)
+        logging.debug(tree)
         
-        query = jtt_visitor.NodeQuery(tree, ['**', 'positions', '0'])
+        query = jtt_visitor.NodeQuery(tree, ['**'])
         logging.debug(query.collect_results())
         
     except Exception as e:
