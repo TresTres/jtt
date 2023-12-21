@@ -18,14 +18,22 @@ NodeValue = typing.Union[
 
 
 class TreeNode:
+
+    """
+    Node representing data from the JSON tree, with the data boxed in a value field.
+    Each node maintains the following metadata:
+    - type of data contained
+    - number of total descendants in the tree
+    """
+
     type: NodeType
     value: NodeValue
+    descendant_count: int
     repr_object = reprlib.Repr()
     repr_object.maxarray = 6
     repr_object.maxstring = 80
     repr_object.maxlong = 80
     repr_object.maxother = 80
-    blob_str = "**"
 
     def __repr__(self) -> str:
         return TreeNode.repr_object.repr(self.value)
@@ -39,6 +47,7 @@ class NullTreeNode(TreeNode):
 
     def __init__(self):
         self.value = None
+        self.descendant_count = 0
 
     def accept_visitor(self, visitor: "NodeVisitor") -> None:
         visitor.visit_null_node(self)
@@ -49,6 +58,7 @@ class StringTreeNode(TreeNode):
 
     def __init__(self, value: str):
         self.value = value
+        self.descendant_count = 0
 
     def accept_visitor(self, visitor: "NodeVisitor") -> None:
         visitor.visit_string_node(self)
@@ -59,6 +69,7 @@ class NumberTreeNode(TreeNode):
 
     def __init__(self, value: typing.Union[int, float]):
         self.value = value
+        self.descendant_count = 0
 
     def accept_visitor(self, visitor: "NodeVisitor") -> None:
         visitor.visit_number_node(self)
@@ -69,6 +80,7 @@ class ListTreeNode(TreeNode):
 
     def __init__(self, value: typing.List[TreeNode]):
         self.value = []
+        self.descendant_count = 0
         for v in value:
             if v is None:
                 self.value.append(NullTreeNode())
@@ -82,6 +94,7 @@ class ListTreeNode(TreeNode):
                 self.value.append(ListTreeNode(v))
             else:
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
+            self.descendant_count += self.value[-1].descendant_count + 1
 
     def accept_visitor(self, visitor: "NodeVisitor") -> None:
         visitor.visit_array_node(self)
@@ -92,6 +105,7 @@ class ObjectTreeNode(TreeNode):
 
     def __init__(self, value: typing.Dict[str, TreeNode]):
         self.value = {}
+        self.descendant_count = 0
         for k, v in value.items():
             if v is None:
                 self.value[k] = NullTreeNode()
@@ -105,6 +119,7 @@ class ObjectTreeNode(TreeNode):
                 self.value[k] = ListTreeNode(v)
             else:
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
+            self.descendant_count += self.value[k].descendant_count + 1
 
     def accept_visitor(self, visitor: "NodeVisitor") -> None:
         visitor.visit_object_node(self)
@@ -114,9 +129,3 @@ def create_tree(data: typing.Dict[str, typing.Any]) -> ObjectTreeNode:
     if type(data) != dict:
         raise ValueError(f"Invalid type: {type(data)} for value {data}")
     return ObjectTreeNode(data)
-
-
-def search_tree_keys(
-    tree: ObjectTreeNode, path: typing.List[str]
-) -> typing.List[TreeNode]:
-    return tree.collect_path_matches(path)
