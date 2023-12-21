@@ -18,14 +18,14 @@ NodeValue = typing.Union[
 
 
 class TreeNode:
-    
+
     """
     Node representing data from the JSON tree, with the data boxed in a value field.
     Each node maintains the following metadata:
     - type of data contained
     - number of total descendants in the tree
     """
-    
+
     type: NodeType
     value: NodeValue
     descendant_count: int
