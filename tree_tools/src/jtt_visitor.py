@@ -1,6 +1,7 @@
 import typing
+import itertools
 
-from src import jtt_tree
+from tree_tools.src import jtt_tree
 
 class NodeVisitor:
     
@@ -25,7 +26,8 @@ class NodeVisitor:
 class NodeQuery(NodeVisitor):
     
     """
-    This class is used to query a tree for a given path.
+    This class is used to query a tree for a given query, which is a list of terms that form a path.
+    Each term is used to traverse the tree, and matching TreeNodes are collected into a list.
     """
     
     path: typing.List[str]
