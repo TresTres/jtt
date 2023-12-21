@@ -21,12 +21,14 @@ def fixture_sample_data_types():
     }
     return data.copy()
 
+
 @pytest.fixture()
 def fixture_sample_data_type_tree(fixture_sample_data_types):
     return create_tree(fixture_sample_data_types)
 
+
 @pytest.fixture()
 def fixture_pokemon_tree():
-    file = open('tree_tools/tests/test_jsons/pokemon.json')
+    file = open("tree_tools/tests/test_jsons/pokemon.json")
     data = json.load(file)
     return create_tree(data)

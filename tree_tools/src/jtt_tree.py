@@ -21,10 +21,10 @@ class TreeNode:
     type: NodeType
     value: NodeValue
     repr_object = reprlib.Repr()
-    repr_object.maxarray=6
-    repr_object.maxstring=80
-    repr_object.maxlong=80
-    repr_object.maxother=80
+    repr_object.maxarray = 6
+    repr_object.maxstring = 80
+    repr_object.maxlong = 80
+    repr_object.maxother = 80
     blob_str = "**"
 
     def __repr__(self) -> str:
