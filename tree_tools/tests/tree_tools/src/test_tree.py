@@ -26,3 +26,23 @@ class TestTree:
         assert tree.value["h"].value is None
         assert tree.value["i"].value == 1.5
         assert tree.value["j"].value == {}
+
+    def test_tree_children_counts(self, fixture_sample_data_types):
+        """Test tree children counts"""
+
+        tree = jtt_tree.create_tree(fixture_sample_data_types)
+
+        assert tree.descendant_count == 13
+        assert tree.value["a"].descendant_count == 0
+        assert tree.value["b"].descendant_count == 0
+        assert tree.value["c"].descendant_count == 2
+        assert tree.value["c"].value["d"].descendant_count == 0
+        assert tree.value["c"].value["e"].descendant_count == 0
+        assert tree.value["f"].descendant_count == 4
+        assert tree.value["f"].value[0].descendant_count == 0
+        assert tree.value["f"].value[1].descendant_count == 0
+        assert tree.value["f"].value[2].descendant_count == 1
+        assert tree.value["f"].value[2].value["g"].descendant_count == 0
+        assert tree.value["h"].descendant_count == 0
+        assert tree.value["i"].descendant_count == 0
+        assert tree.value["j"].descendant_count == 0
