@@ -1,4 +1,3 @@
-import math
 import enum
 import typing
 import reprlib
@@ -138,6 +137,34 @@ class ObjectTreeNode(TreeNode):
 
     def accept_visitor(self, visitor: "NodeVisitor") -> None:
         visitor.visit_object_node(self)
+
+
+class NodeVisitor:
+    
+    """
+    Visitor pattern for tree nodes.
+    """
+    
+    tree: TreeNode
+
+    def visit_null_node(self, node: NullTreeNode) -> None:
+        pass
+
+    def visit_string_node(self, node: StringTreeNode) -> None:
+        pass
+
+    def visit_number_node(self, node: NumberTreeNode) -> None:
+        pass
+    
+    def visit_boolean_node(self, node: BooleanTreeNode) -> None:
+        pass
+
+    def visit_array_node(self, node: ListTreeNode) -> None:
+        pass
+
+    def visit_object_node(self, node: ObjectTreeNode) -> None:
+        pass
+    
 
 
 def create_tree(data: typing.Dict[str, typing.Any]) -> ObjectTreeNode:
