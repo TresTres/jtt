@@ -33,7 +33,7 @@ def load_json(ctx: click.Context, input_file: click.File):
         tree = jtt_tree.create_tree(data)
         logging.debug(tree)
 
-        query = jtt_visitor.NodeQuery(tree, ["**"])
+        query = jtt_visitor.NodeQueryEvaluator(tree, ["**"])
         logging.debug(query.collect_results())
 
     except Exception as e:

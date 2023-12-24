@@ -21,9 +21,8 @@ class NodeVisitor:
 
     def visit_object_node(self, node: jtt_tree.ObjectTreeNode) -> None:
         pass
-
-
-class NodeQuery(NodeVisitor):
+    
+class NodeQueryEvaluator(NodeVisitor):
 
     """
     This class is used to query a tree for a given query, which is a list of terms that form a path.
@@ -81,12 +80,12 @@ class NodeQuery(NodeVisitor):
         if term.isdigit():
             index = int(term)
             if index < len(node.value):
-                visitor = NodeQuery(node.value[index], self.path.copy())
+                visitor = NodeQueryEvaluator(node.value[index], self.path.copy())
                 self.results.extend(visitor.collect_results())
             return
         if term == self.wildcard:
             for child in node.value:
-                visitor = NodeQuery(child, self.path.copy())
+                visitor = NodeQueryEvaluator(child, self.path.copy())
                 self.results.extend(visitor.collect_results())
         return
 
@@ -103,10 +102,10 @@ class NodeQuery(NodeVisitor):
         term = self.path.pop(0)
         if term == self.wildcard:
             for child in node.value.values():
-                visitor = NodeQuery(child, self.path.copy())
+                visitor = NodeQueryEvaluator(child, self.path.copy())
                 self.results.extend(visitor.collect_results())
             return
         if term in node.value:
-            visitor = NodeQuery(node.value[term], self.path.copy())
+            visitor = NodeQueryEvaluator(node.value[term], self.path.copy())
             self.results.extend(visitor.collect_results())
         return
