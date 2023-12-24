@@ -15,6 +15,9 @@ class NodeVisitor:
 
     def visit_number_node(self, node: jtt_tree.NumberTreeNode) -> None:
         pass
+    
+    def visit_boolean_node(self, node: jtt_tree.BooleanTreeNode) -> None:
+        pass
 
     def visit_array_node(self, node: jtt_tree.ListTreeNode) -> None:
         pass
@@ -60,6 +63,13 @@ class NodeQueryEvaluator(NodeVisitor):
             self.results.append(node)
 
     def visit_number_node(self, node: jtt_tree.NumberTreeNode) -> None:
+        """
+        Add the node to the results if the path is empty.
+        """
+        if not self.path:
+            self.results.append(node)
+            
+    def visit_boolean_node(self, node: jtt_tree.BooleanTreeNode) -> None:
         """
         Add the node to the results if the path is empty.
         """
