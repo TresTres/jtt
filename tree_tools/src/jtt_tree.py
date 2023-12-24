@@ -1,4 +1,3 @@
-import math
 import enum
 import typing
 import reprlib
@@ -10,6 +9,7 @@ class NodeType(enum.Enum):
     NUMBER = "NUMBER"
     ARRAY = "ARRAY"
     OBJECT = "OBJECT"
+    BOOLEAN = "BOOLEAN"
 
 
 NodeValue = typing.Union[
@@ -75,6 +75,17 @@ class NumberTreeNode(TreeNode):
         visitor.visit_number_node(self)
 
 
+class BooleanTreeNode(TreeNode):
+    type = NodeType.BOOLEAN
+
+    def __init__(self, value: bool):
+        self.value = value
+        self.descendant_count = 0
+
+    def accept_visitor(self, visitor: "NodeVisitor") -> None:
+        visitor.visit_boolean_node(self)
+
+
 class ListTreeNode(TreeNode):
     type = NodeType.ARRAY
 
@@ -88,6 +99,8 @@ class ListTreeNode(TreeNode):
                 self.value.append(StringTreeNode(v))
             elif type(v) == int or type(v) == float:
                 self.value.append(NumberTreeNode(v))
+            elif type(v) == bool:
+                self.value.append(BooleanTreeNode(v))
             elif type(v) == dict:
                 self.value.append(ObjectTreeNode(v))
             elif type(v) == list:
@@ -113,6 +126,8 @@ class ObjectTreeNode(TreeNode):
                 self.value[k] = StringTreeNode(v)
             elif type(v) == int or type(v) == float:
                 self.value[k] = NumberTreeNode(v)
+            elif type(v) == bool:
+                self.value[k] = BooleanTreeNode(v)
             elif type(v) == dict:
                 self.value[k] = ObjectTreeNode(v)
             elif type(v) == list:
@@ -123,6 +138,33 @@ class ObjectTreeNode(TreeNode):
 
     def accept_visitor(self, visitor: "NodeVisitor") -> None:
         visitor.visit_object_node(self)
+
+
+class NodeVisitor:
+
+    """
+    Visitor pattern for tree nodes.
+    """
+
+    tree: TreeNode
+
+    def visit_null_node(self, node: NullTreeNode) -> None:
+        pass
+
+    def visit_string_node(self, node: StringTreeNode) -> None:
+        pass
+
+    def visit_number_node(self, node: NumberTreeNode) -> None:
+        pass
+
+    def visit_boolean_node(self, node: BooleanTreeNode) -> None:
+        pass
+
+    def visit_array_node(self, node: ListTreeNode) -> None:
+        pass
+
+    def visit_object_node(self, node: ObjectTreeNode) -> None:
+        pass
 
 
 def create_tree(data: typing.Dict[str, typing.Any]) -> ObjectTreeNode:

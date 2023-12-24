@@ -12,37 +12,34 @@ class TestTree:
             jtt_tree.create_tree(data)
 
     def test_tree_creation_success(self, fixture_sample_data_types):
-        """Test tree creation success"""
+        """Test tree creation success -- don't auto parse strings into numbers"""
 
         tree = jtt_tree.create_tree(fixture_sample_data_types)
 
-        assert tree.value["a"].value == 1
-        assert tree.value["b"].value == "2"
-        assert tree.value["c"].value["d"].value == 3
-        assert tree.value["c"].value["e"].value == "4"
-        assert tree.value["f"].value[0].value == 5
-        assert tree.value["f"].value[1].value == "6"
-        assert tree.value["f"].value[2].value["g"].value == 7
-        assert tree.value["h"].value is None
-        assert tree.value["i"].value == 1.5
-        assert tree.value["j"].value == {}
+        assert tree.type == jtt_tree.NodeType.OBJECT
+        assert tree.value["a"].type == jtt_tree.NodeType.NUMBER
+        assert tree.value["b"].type == jtt_tree.NodeType.STRING
+        assert tree.value["c"].type == jtt_tree.NodeType.NUMBER
+        assert tree.value["d"].type == jtt_tree.NodeType.BOOLEAN
+        assert tree.value["e"].type == jtt_tree.NodeType.OBJECT
+        assert tree.value["e"].value["f"].type == jtt_tree.NodeType.NUMBER
+        assert tree.value["e"].value["g"].type == jtt_tree.NodeType.STRING
+        assert tree.value["e"].value["h"].type == jtt_tree.NodeType.BOOLEAN
+        assert tree.value["i"].type == jtt_tree.NodeType.ARRAY
+        assert tree.value["i"].value[0].type == jtt_tree.NodeType.NUMBER
+        assert tree.value["i"].value[1].type == jtt_tree.NodeType.STRING
+        assert tree.value["i"].value[2].type == jtt_tree.NodeType.BOOLEAN
+        assert tree.value["i"].value[3].type == jtt_tree.NodeType.OBJECT
+        assert tree.value["i"].value[3].value["j"].type == jtt_tree.NodeType.NUMBER
+        assert tree.value["k"].type == jtt_tree.NodeType.NULL
+        assert tree.value["l"].type == jtt_tree.NodeType.OBJECT
 
     def test_tree_children_counts(self, fixture_sample_data_types):
         """Test tree children counts"""
 
         tree = jtt_tree.create_tree(fixture_sample_data_types)
 
-        assert tree.descendant_count == 13
-        assert tree.value["a"].descendant_count == 0
-        assert tree.value["b"].descendant_count == 0
-        assert tree.value["c"].descendant_count == 2
-        assert tree.value["c"].value["d"].descendant_count == 0
-        assert tree.value["c"].value["e"].descendant_count == 0
-        assert tree.value["f"].descendant_count == 4
-        assert tree.value["f"].value[0].descendant_count == 0
-        assert tree.value["f"].value[1].descendant_count == 0
-        assert tree.value["f"].value[2].descendant_count == 1
-        assert tree.value["f"].value[2].value["g"].descendant_count == 0
-        assert tree.value["h"].descendant_count == 0
-        assert tree.value["i"].descendant_count == 0
-        assert tree.value["j"].descendant_count == 0
+        assert tree.descendant_count == 16
+        assert tree.value["e"].descendant_count == 3
+        assert tree.value["i"].descendant_count == 5
+        assert tree.value["i"].value[3].descendant_count == 1

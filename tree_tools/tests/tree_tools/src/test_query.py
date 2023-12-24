@@ -1,15 +1,13 @@
-import itertools
-
-from tree_tools.src import jtt_visitor
+from tree_tools.src import jtt_query
 
 
 class TestNodeQuery:
     def test_blank_query(
         self, fixture_sample_data_type_tree, fixture_sample_data_types
     ):
-        """Test blank query will deliver the root node"""
+        """Test empty query will deliver the root node"""
 
-        query = jtt_visitor.NodeQuery(fixture_sample_data_type_tree, [])
+        query = jtt_query.TreeQuery(fixture_sample_data_type_tree)
         results = query.collect_results()
 
         assert len(results) == 1
@@ -18,9 +16,9 @@ class TestNodeQuery:
     def test_single_wildcard_query(
         self, fixture_sample_data_type_tree, fixture_sample_data_types
     ):
-        """Test single wildcard will deliver all nodes underneath the root node"""
+        """Test get-all query will deliver all nodes underneath the root node"""
 
-        wildcard_query = jtt_visitor.NodeQuery(fixture_sample_data_type_tree, ["**"])
+        wildcard_query = jtt_query.TreeQuery(fixture_sample_data_type_tree).get_all()
         results = wildcard_query.collect_results()
 
         assert len(results) == len(fixture_sample_data_types)
@@ -28,7 +26,9 @@ class TestNodeQuery:
     def test_not_found_query(self, fixture_sample_data_type_tree):
         """Test that a query that doesn't match anything returns an empty list"""
 
-        query = jtt_visitor.NodeQuery(fixture_sample_data_type_tree, ["z"])
+        query = jtt_query.TreeQuery(fixture_sample_data_type_tree).filter_key(
+            "non-existent"
+        )
         results = query.collect_results()
 
         assert not results
@@ -36,7 +36,13 @@ class TestNodeQuery:
     def test_object_key_query(self, fixture_pokemon_tree):
         """Test that data is extracted from objects using keys"""
 
-        query = jtt_visitor.NodeQuery(fixture_pokemon_tree, ["pokemon", "**", "id"])
+        query = (
+            jtt_query.TreeQuery(fixture_pokemon_tree)
+            .filter_key("pokemon")
+            .get_all()
+            .filter_key("id")
+        )
+
         results = query.collect_results()
         assert len(results) == 151
         assert [r.value for r in results] == list(range(1, 152))
@@ -44,9 +50,14 @@ class TestNodeQuery:
     def test_list_index_query(self, fixture_pokemon_tree):
         """Test that data is extracted from lists using indices"""
 
-        query = jtt_visitor.NodeQuery(
-            fixture_pokemon_tree, ["pokemon", "**", "multipliers", "1"]
+        query = (
+            jtt_query.TreeQuery(fixture_pokemon_tree)
+            .filter_key("pokemon")
+            .get_all()
+            .filter_key("multipliers")
+            .filter_index(1)
         )
+
         results = query.collect_results()
         assert len(results) == 37
         compare_results = []

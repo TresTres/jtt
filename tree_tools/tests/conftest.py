@@ -10,14 +10,16 @@ def fixture_sample_data_types():
     data = {
         "a": 1,
         "b": "2",
-        "c": {
-            "d": 3,
-            "e": "4",
+        "c": 1.5,
+        "d": True,
+        "e": {
+            "f": 3,
+            "g": "4",
+            "h": False,
         },
-        "f": [5, "6", {"g": 7}],
-        "h": None,
-        "i": 1.5,
-        "j": {},
+        "i": [5, "6", True, {"j": 7}],
+        "k": None,
+        "l": {},
     }
     return data.copy()
 
