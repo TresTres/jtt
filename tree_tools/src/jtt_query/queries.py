@@ -27,7 +27,6 @@ class NodeQuery(jtt_tree.NodeVisitor):
         self.tree = tree
         self.op_queue = deque()
         self.results = []
-    
 
     def _process_op(self, node: jtt_tree.TreeNode) -> typing.List[jtt_tree.TreeNode]:
         """
@@ -37,7 +36,7 @@ class NodeQuery(jtt_tree.NodeVisitor):
             raise NodeQueryError("Nothing left to evaluate, query path is empty.")
         query_op = self.op_queue.popleft()
         return query_op.evaluate(node)
-    
+
     def collect_results(self) -> typing.List[jtt_tree.TreeNode]:
         """
         Collect the results of the query by triggering the visitation.
@@ -52,7 +51,6 @@ class NodeQuery(jtt_tree.NodeVisitor):
         new_query = NodeQuery(node)
         new_query.op_queue = self.op_queue.copy()
         return new_query
-
 
     def visit_null_node(self, node: jtt_tree.NullTreeNode) -> None:
         """
@@ -106,7 +104,6 @@ class NodeQuery(jtt_tree.NodeVisitor):
             new_query = self.copy_query_to_new_node(child)
             self.results.extend(new_query.collect_results())
 
-
     def visit_object_node(self, node: jtt_tree.ObjectTreeNode) -> None:
         """
         Add the node to the results if the path is empty.
@@ -118,8 +115,6 @@ class NodeQuery(jtt_tree.NodeVisitor):
         for child in self._process_op(node):
             new_query = self.copy_query_to_new_node(child)
             self.results.extend(new_query.collect_results())
-        
-
 
 
 class TreeQuery(NodeQuery):
@@ -128,14 +123,14 @@ class TreeQuery(NodeQuery):
     This class is used to build and evaluate queries against JSON objects.
     """
 
-    def filter_key(self, predicate: str, strict: bool = False) -> 'TreeQuery':
+    def filter_key(self, predicate: str, strict: bool = False) -> "TreeQuery":
         self.op_queue.append(operations.FilterKey(predicate, strict=strict))
         return self
 
-    def filter_index(self, index: int, strict: bool = False) -> 'TreeQuery':
+    def filter_index(self, index: int, strict: bool = False) -> "TreeQuery":
         self.op_queue.append(operations.FilterIndex(index, strict=strict))
         return self
 
-    def get_all(self, strict: bool = False) -> 'TreeQuery':
+    def get_all(self, strict: bool = False) -> "TreeQuery":
         self.op_queue.append(operations.GetAll(strict=strict))
         return self

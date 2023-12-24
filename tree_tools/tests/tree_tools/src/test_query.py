@@ -1,5 +1,5 @@
-
 from tree_tools.src import jtt_query
+
 
 class TestNodeQuery:
     def test_blank_query(
@@ -26,7 +26,9 @@ class TestNodeQuery:
     def test_not_found_query(self, fixture_sample_data_type_tree):
         """Test that a query that doesn't match anything returns an empty list"""
 
-        query = jtt_query.TreeQuery(fixture_sample_data_type_tree).filter_key("non-existent")
+        query = jtt_query.TreeQuery(fixture_sample_data_type_tree).filter_key(
+            "non-existent"
+        )
         results = query.collect_results()
 
         assert not results
@@ -34,8 +36,13 @@ class TestNodeQuery:
     def test_object_key_query(self, fixture_pokemon_tree):
         """Test that data is extracted from objects using keys"""
 
-        query = jtt_query.TreeQuery(fixture_pokemon_tree).filter_key("pokemon").get_all().filter_key("id")
-        
+        query = (
+            jtt_query.TreeQuery(fixture_pokemon_tree)
+            .filter_key("pokemon")
+            .get_all()
+            .filter_key("id")
+        )
+
         results = query.collect_results()
         assert len(results) == 151
         assert [r.value for r in results] == list(range(1, 152))
@@ -43,7 +50,13 @@ class TestNodeQuery:
     def test_list_index_query(self, fixture_pokemon_tree):
         """Test that data is extracted from lists using indices"""
 
-        query = jtt_query.TreeQuery(fixture_pokemon_tree).filter_key("pokemon").get_all().filter_key("multipliers").filter_index(1)
+        query = (
+            jtt_query.TreeQuery(fixture_pokemon_tree)
+            .filter_key("pokemon")
+            .get_all()
+            .filter_key("multipliers")
+            .filter_index(1)
+        )
 
         results = query.collect_results()
         assert len(results) == 37

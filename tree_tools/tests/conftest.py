@@ -11,7 +11,7 @@ def fixture_sample_data_types():
         "a": 1,
         "b": "2",
         "c": 1.5,
-        "d": True, 
+        "d": True,
         "e": {
             "f": 3,
             "g": "4",
