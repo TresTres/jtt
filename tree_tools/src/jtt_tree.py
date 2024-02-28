@@ -38,9 +38,6 @@ class TreeNode:
     def __repr__(self) -> str:
         return TreeNode.repr_object.repr(self.value)
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        pass
-
 
 class NullTreeNode(TreeNode):
     type = NodeType.NULL
@@ -48,9 +45,6 @@ class NullTreeNode(TreeNode):
     def __init__(self):
         self.value = None
         self.descendant_count = 0
-
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_null_node(self)
 
 
 class StringTreeNode(TreeNode):
@@ -60,9 +54,6 @@ class StringTreeNode(TreeNode):
         self.value = value
         self.descendant_count = 0
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_string_node(self)
-
 
 class NumberTreeNode(TreeNode):
     type = NodeType.NUMBER
@@ -71,9 +62,6 @@ class NumberTreeNode(TreeNode):
         self.value = value
         self.descendant_count = 0
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_number_node(self)
-
 
 class BooleanTreeNode(TreeNode):
     type = NodeType.BOOLEAN
@@ -81,10 +69,6 @@ class BooleanTreeNode(TreeNode):
     def __init__(self, value: bool):
         self.value = value
         self.descendant_count = 0
-
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_boolean_node(self)
-
 
 class ListTreeNode(TreeNode):
     type = NodeType.ARRAY
@@ -109,9 +93,6 @@ class ListTreeNode(TreeNode):
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
             self.descendant_count += self.value[-1].descendant_count + 1
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_array_node(self)
-
 
 class ObjectTreeNode(TreeNode):
     type = NodeType.OBJECT
@@ -135,36 +116,6 @@ class ObjectTreeNode(TreeNode):
             else:
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
             self.descendant_count += self.value[k].descendant_count + 1
-
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_object_node(self)
-
-
-class NodeVisitor:
-
-    """
-    Visitor pattern for tree nodes.
-    """
-
-    tree: TreeNode
-
-    def visit_null_node(self, node: NullTreeNode) -> None:
-        pass
-
-    def visit_string_node(self, node: StringTreeNode) -> None:
-        pass
-
-    def visit_number_node(self, node: NumberTreeNode) -> None:
-        pass
-
-    def visit_boolean_node(self, node: BooleanTreeNode) -> None:
-        pass
-
-    def visit_array_node(self, node: ListTreeNode) -> None:
-        pass
-
-    def visit_object_node(self, node: ObjectTreeNode) -> None:
-        pass
 
 
 def create_tree(data: typing.Dict[str, typing.Any]) -> ObjectTreeNode:
