@@ -1,5 +1,5 @@
 {
-    "0": {
+    "foo": {
         "_id": 0,
         "name": "foo",
         "value": "bar"
