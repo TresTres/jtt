@@ -1,17 +1,18 @@
 import pytest
+from typing import Dict, Any
 
 from tree_tools.src import jtt_tree
 
 
 class TestTree:
     @pytest.mark.parametrize("data", [(None), (1), (1.0), ("a"), (True), (False), ([])])
-    def test_tree_creation_failure(self, data):
+    def test_tree_creation_failure(self, data: Any):
         """Test tree creation failure"""
 
         with pytest.raises(ValueError):
             jtt_tree.create_tree(data)
 
-    def test_tree_creation_success(self, fixture_sample_data_types):
+    def test_tree_creation_success(self, fixture_sample_data_types: Dict[str, Any]):
         """Test tree creation success -- don't auto parse strings into numbers"""
 
         tree = jtt_tree.create_tree(fixture_sample_data_types)
@@ -34,7 +35,7 @@ class TestTree:
         assert tree.value["k"].type == jtt_tree.NodeType.NULL
         assert tree.value["l"].type == jtt_tree.NodeType.OBJECT
 
-    def test_tree_children_counts(self, fixture_sample_data_types):
+    def test_tree_children_counts(self, fixture_sample_data_types: Dict[str, Any]):
         """Test tree children counts"""
 
         tree = jtt_tree.create_tree(fixture_sample_data_types)

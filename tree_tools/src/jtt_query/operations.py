@@ -35,7 +35,7 @@ class KeySelectOperation(QueryOperation):
         self.key = key
         self.next = None
         
-    def perform(self, node: jtt_tree.TreeNode) -> jtt_tree.TreeNode:
+    def perform(self, node: jtt_tree.TreeNode) -> Optional[jtt_tree.TreeNode]:
         """
         If the node is a dictionary, return the value at the key. 
         Otherwise, return nothing
@@ -44,7 +44,6 @@ class KeySelectOperation(QueryOperation):
             return node.value.get(self.key, None)
         else:
             return None
-        
         
 class QueryOperationChain:
     """
@@ -58,16 +57,7 @@ class QueryOperationChain:
     def __init__(self) -> None:
         self.head = None
 
-    def __len__(self) -> int:
-        """
-        Returns the number of operations in the chain.
-        """
-        count = 0
-        current = self.head
-        while current:
-            count += 1
-            current = current.next
-        return count
+
         
     def append(self, op: QueryOperation) -> None:
         """
@@ -105,7 +95,7 @@ class QueryOperationChain:
             return op
         return None
     
-    def operations(self) -> Generator[QueryOperation, None, None]:
+    def __iter__(self) -> Generator[QueryOperation, None, None]:
         """
         Returns a generator that yields each operation in the chain.
         This is a destructive operation as each yield calls pop_operation.
@@ -113,3 +103,15 @@ class QueryOperationChain:
         
         while self.has_next():
             yield self.pop_operation()
+            
+    def __len__(self) -> int:
+        """
+        Returns the number of operations in the chain.
+        """
+        count = 0
+        current = self.head
+        while current:
+            count += 1
+            current = current.next
+        return count
+    

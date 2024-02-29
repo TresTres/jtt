@@ -54,6 +54,11 @@ class TestJMESPathParserValidation:
 
 class TestJMESPathParserTokenization:
     
+    
+    def test_single_identifier_tokenization(self, parser: parsing.JMESPathParser):
+        parser.tokenize('foo')
+        assert parser.identifiers == ['foo']
+    
     def test_identifier_tokenization(self, parser: parsing.JMESPathParser):
         parser.tokenize('foo.bar.baz')
         assert parser.identifiers == ['foo', 'bar', 'baz']
@@ -65,6 +70,6 @@ class TestJMESPathParserOperationCreation:
         parser.identifiers = ['foo', 'bar', 'baz']
         parser.create_query_operations()
         assert len(parser.operation_queue) == 3
-        ops = [op for op in parser.operation_queue.operations()]
+        ops = [op for op in parser.operation_queue]
         assert all(isinstance(op, parsing.KeySelectOperation) for op in ops)
         assert [op.key for op in ops] == ['foo', 'bar', 'baz']

@@ -41,9 +41,6 @@ class JMESPathParser:
         if not PATTERN_START_WITH_WORD.match(query) and not PATTERN_QUOTE_CHARACTERS.match(query):
             raise JMESPathValidationError("Query string must start with a word character or a quote character.")
     
-        
-    
-    
     def tokenize(self, query: str) -> None:
         """
         This method breaks up a query string into tokens using expected delimiters and special symbols. 
@@ -54,7 +51,9 @@ class JMESPathParser:
         """
         
         if '.' in query:
-            self.identifiers = query.split('.')            
+            self.identifiers = query.split('.')
+        else:
+            self.identifiers.append(query)            
             
     def create_query_operations(self) -> None:
         """
