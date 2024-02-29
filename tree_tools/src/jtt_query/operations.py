@@ -1,9 +1,7 @@
 from abc import abstractmethod
-from typing import Optional
+from typing import Optional, Generator
 
 from tree_tools.src import jtt_tree
-from tree_tools.src.jtt_query import utils
-
 
 class QueryOperationError(Exception):
     pass
@@ -25,10 +23,10 @@ class QueryOperation:
         pass
 
     
-class KeyOperation(QueryOperation):
+class KeySelectOperation(QueryOperation):
     """
     This class is used to represent the key selection in a query.  
-    Key selection only applies to ObjectTreeNodes and returns the node at the specified key.
+    A key selection only applies to ObjectTreeNodes and returns the TreeNode stored at the specified key.
     """
 
     key: str
@@ -57,8 +55,19 @@ class QueryOperationChain:
     
     head: Optional[QueryOperation]
     
-    def __init__(self, head: QueryOperation) -> None:
-        self.head = head
+    def __init__(self) -> None:
+        self.head = None
+
+    def __len__(self) -> int:
+        """
+        Returns the number of operations in the chain.
+        """
+        count = 0
+        current = self.head
+        while current:
+            count += 1
+            current = current.next
+        return count
         
     def append(self, op: QueryOperation) -> None:
         """
@@ -83,12 +92,24 @@ class QueryOperationChain:
         """
         return self.head is not None    
     
-    def pop_operation(self, tree: jtt_tree.TreeNode) -> Optional[jtt_tree.TreeNode]:
+    def pop_operation(self) -> Optional[QueryOperation]:
         """
-        Removes the first operation from the chain and returns its result.
+        Removes the first operation from the chain and returns it.
+        
+        Args:
+            tree: The TreeNode to perform the operation on.
         """
         if self.head:
             op = self.head
             self.head = self.head.next
-            return op.perform(tree)
+            return op
         return None
+    
+    def operations(self) -> Generator[QueryOperation, None, None]:
+        """
+        Returns a generator that yields each operation in the chain.
+        This is a destructive operation as each yield calls pop_operation.
+        """
+        
+        while self.has_next():
+            yield self.pop_operation()

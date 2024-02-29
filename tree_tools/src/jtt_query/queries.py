@@ -12,8 +12,32 @@ class NodeQueryError(Exception):
 
     pass
 
+class Cursor: 
+    """
+    This class is used to represent the current position in the tree during query processing.
+    """
+    pass
 
-class NodeQuery(jtt_tree.NodeVisitor):
+
+class QueryProcessor:
+    """
+    This class is used to evaluate queries against TreeNode objects.
+    """
+    operation_chain: operations.QueryOperationChain
+    result_tree: jtt_tree.TreeNode
+    read_tree: jtt_tree.TreeNode
+    cursor: Cursor
+    
+    def __init__(self, tree: jtt_tree.TreeNode, operation_chain: operations.QueryOperationChain) -> None:
+        self.read_tree = tree
+        self.result_tree = None
+        self.operation_chain = operation_chain
+        self.cursor = Cursor()
+    
+    pass 
+
+
+class NodeQuery:
 
     """
     This class is used to build and evaluate queries against TreeNode objects.
