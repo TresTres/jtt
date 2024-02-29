@@ -1,11 +1,9 @@
 from tree_tools.src import jtt_query
 
 
-
 # class TestQueryProcessor:
-    
-#     # def test
 
+#     # def test
 
 
 # class TestNodeQuery:

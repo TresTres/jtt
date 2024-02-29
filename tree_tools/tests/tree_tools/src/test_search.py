@@ -3,9 +3,8 @@ from typing import Dict, Any
 
 from tree_tools.src.search import jmespath_search
 
+
 class TestSearchSampleData:
-    
-    
     @pytest.mark.parametrize(
         "query,expected_result",
         [
@@ -19,7 +18,11 @@ class TestSearchSampleData:
             ("e.h", False),
         ],
     )
-    def test_search_simple_identifier_query(self, fixture_sample_data_types: Dict[str, Any], query: str, expected_result: Any):
-        
+    def test_search_simple_identifier_query(
+        self,
+        fixture_sample_data_types: Dict[str, Any],
+        query: str,
+        expected_result: Any,
+    ):
         results = jmespath_search(query, fixture_sample_data_types)
         assert results == expected_result

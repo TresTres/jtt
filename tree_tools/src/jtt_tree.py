@@ -37,7 +37,7 @@ class TreeNode:
 
     def __repr__(self) -> str:
         return TreeNode.repr_object.repr(self.value)
-    
+
     def serialize(self) -> typing.Any:
         """
         Serialize the object tree into a dictionary.
@@ -67,7 +67,7 @@ class NumberTreeNode(TreeNode):
     def __init__(self, value: typing.Union[int, float]):
         self.value = value
         self.descendant_count = 0
-        
+
 
 class BooleanTreeNode(TreeNode):
     type = NodeType.BOOLEAN
@@ -75,6 +75,7 @@ class BooleanTreeNode(TreeNode):
     def __init__(self, value: bool):
         self.value = value
         self.descendant_count = 0
+
 
 class ListTreeNode(TreeNode):
     value: typing.List[TreeNode]
@@ -99,7 +100,7 @@ class ListTreeNode(TreeNode):
             else:
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
             self.descendant_count += self.value[-1].descendant_count + 1
-            
+
     def serialize(self) -> typing.List[typing.Any]:
         """
         Serialize the object tree into a list.
@@ -108,7 +109,6 @@ class ListTreeNode(TreeNode):
 
 
 class ObjectTreeNode(TreeNode):
-    
     value: typing.Dict[str, TreeNode]
     type = NodeType.OBJECT
 
@@ -131,7 +131,7 @@ class ObjectTreeNode(TreeNode):
             else:
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
             self.descendant_count += self.value[k].descendant_count + 1
-            
+
     def serialize(self) -> typing.Dict[str, typing.Any]:
         """
         Serialize the object tree into a dictionary.
