@@ -1,7 +1,7 @@
-import typing
+from abc import abstractmethod
+from typing import Optional, Generator
 
 from tree_tools.src import jtt_tree
-from tree_tools.src.jtt_query import utils
 
 
 class QueryOperationError(Exception):
@@ -9,82 +9,108 @@ class QueryOperationError(Exception):
 
 
 class QueryOperation:
-    strict: bool
+    """
+    Represents a single operation in an operation chain.
+    """
 
-    def __init__(self, strict: bool = False) -> None:
-        self.strict = strict
+    next: Optional["QueryOperation"]
+
+    @abstractmethod
+    def perform(self, node: jtt_tree.TreeNode) -> Optional[jtt_tree.TreeNode]:
+        """
+        Conducts an operation on a node and returns a result if possible.
+        An operation
+        """
         pass
 
-    def evaluate(self, node: jtt_tree.TreeNode) -> typing.List[jtt_tree.TreeNode]:
-        pass
 
-
-class GetAll(QueryOperation):
+class KeySelectOperation(QueryOperation):
     """
-    Get all child nodes.
+    This class is used to represent the key selection in a query.
+    A key selection only applies to ObjectTreeNodes and returns the TreeNode stored at the specified key.
     """
 
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
+    key: str
 
-    def evaluate(self, node: jtt_tree.TreeNode) -> typing.List[jtt_tree.TreeNode]:
-        if node.type is jtt_tree.NodeType.ARRAY:
-            return node.value
-        if node.type is jtt_tree.NodeType.OBJECT:
-            return list(node.value.values())
-        if self.strict:
-            raise QueryOperationError(
-                "Cannot evaluate query get-all operation on non-array or non-object node."
-            )
-        return []
+    def __init__(self, key: str) -> None:
+        self.key = key
+        self.next = None
+
+    def perform(self, node: jtt_tree.TreeNode) -> Optional[jtt_tree.TreeNode]:
+        """
+        If the node is a dictionary, return the value at the key.
+        Otherwise, return nothing
+        """
+        if node.type == jtt_tree.NodeType.OBJECT:
+            return node.value.get(self.key, None)
+        else:
+            return None
 
 
-class FilterIndex(QueryOperation):
-
+class QueryOperationChain:
     """
-    Filter child nodes by index.
+    This class is used to represent the operations in a query in proper order.
+    An operation chain, when executed, should resolve to a ObjectTreeNode that contains the valid
+    results.
     """
 
-    index: int
+    head: Optional[QueryOperation]
 
-    def __init__(self, index: int, **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.index = index
+    def __init__(self) -> None:
+        self.head = None
 
-    def evaluate(self, node: jtt_tree.TreeNode) -> typing.List[jtt_tree.TreeNode]:
-        if node.type is jtt_tree.NodeType.ARRAY:
-            if utils.index_within_list(self.index, node.value):
-                return [node.value[self.index]]
-            if self.strict:
-                raise QueryOperationError(
-                    f"Index {self.index} out of bounds for array node with length {len(node.value)}."
-                )
-            return []
-        if self.strict:
-            raise QueryOperationError(
-                "Cannot evaluate query index-matching operation on non-array node."
-            )
-        return []
+    def append(self, op: QueryOperation) -> None:
+        """
+        Append an operation to the end of the chain, including any downstream attached operations.
 
+        Args:
+            op: The operation to append.
+        """
 
-class FilterKey(QueryOperation):
-    predicate: str
+        if not self.head:
+            self.head = op
+            return
 
-    def __init__(self, predicate: str, **kwargs) -> None:
-        super().__init__(**kwargs)
-        self.predicate = predicate
+        current = self.head
+        while current.next:
+            current = current.next
+        current.next = op
 
-    def evaluate(self, node: jtt_tree.TreeNode) -> typing.List[jtt_tree.TreeNode]:
-        if node.type is jtt_tree.NodeType.OBJECT:
-            if self.predicate in node.value:
-                return [node.value[self.predicate]]
-            if self.strict:
-                raise QueryOperationError(
-                    f"Key {self.predicate} not found in object node with keys {node.value.keys()}."
-                )
-            return []
-        if self.strict:
-            raise QueryOperationError(
-                "Cannot evaluate query key-matching operation on non-object node."
-            )
-        return []
+    def has_next(self) -> bool:
+        """
+        Returns True if there are more operations to perform.
+        """
+        return self.head is not None
+
+    def pop_operation(self) -> Optional[QueryOperation]:
+        """
+        Removes the first operation from the chain and returns it.
+
+        Args:
+            tree: The TreeNode to perform the operation on.
+        """
+        if self.head:
+            op = self.head
+            self.head = self.head.next
+            return op
+        return None
+
+    def __iter__(self) -> Generator[QueryOperation, None, None]:
+        """
+        Returns a generator that yields each operation in the chain.
+        This is a destructive operation as each yield calls pop_operation.
+        """
+
+        while self.has_next():
+            yield self.pop_operation()
+
+    def __len__(self) -> int:
+        """
+        Returns the number of operations in the chain.
+        """
+        count = 0
+        current = self.head
+        while current:
+            count += 1
+            current = current.next
+        return count

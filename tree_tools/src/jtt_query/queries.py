@@ -1,5 +1,4 @@
-import typing
-from collections import deque
+from typing import Optional
 
 from tree_tools.src import jtt_tree
 from tree_tools.src.jtt_query import operations
@@ -13,124 +12,54 @@ class NodeQueryError(Exception):
     pass
 
 
-class NodeQuery(jtt_tree.NodeVisitor):
-
+class Cursor:
     """
-    This class is used to build and evaluate queries against TreeNode objects.
-    """
-
-    op_queue: typing.Deque[operations.QueryOperation]
-    tree: jtt_tree.TreeNode
-    results: typing.List[jtt_tree.TreeNode]
-
-    def __init__(self, tree: jtt_tree.TreeNode) -> None:
-        self.tree = tree
-        self.op_queue = deque()
-        self.results = []
-
-    def _process_op(self, node: jtt_tree.TreeNode) -> typing.List[jtt_tree.TreeNode]:
-        """
-        Process the next query operation.
-        """
-        if not self.op_queue:
-            raise NodeQueryError("Nothing left to evaluate, query path is empty.")
-        query_op = self.op_queue.popleft()
-        return query_op.evaluate(node)
-
-    def collect_results(self) -> typing.List[jtt_tree.TreeNode]:
-        """
-        Collect the results of the query by triggering the visitation.
-        """
-        self.tree.accept_visitor(self)
-        return self.results
-
-    def copy_query_to_new_node(self, node: jtt_tree.TreeNode) -> "NodeQuery":
-        """
-        Copy the query to a new node with the same operations.
-        """
-        new_query = NodeQuery(node)
-        new_query.op_queue = self.op_queue.copy()
-        return new_query
-
-    def visit_null_node(self, node: jtt_tree.NullTreeNode) -> None:
-        """
-        Add the node to the results if the path is empty.
-        Otherwise, evaluate according to the query.
-        """
-        if not self.op_queue:
-            self.results.append(node)
-            return
-        self.results.extend(self._process_op(node))
-
-    def visit_string_node(self, node: jtt_tree.StringTreeNode) -> None:
-        """
-        Add the node to the results if the path is empty.
-        Otherwise, evaluate according to the query.
-        """
-        if not self.op_queue:
-            self.results.append(node)
-            return
-        self.results.extend(self._process_op(node))
-
-    def visit_number_node(self, node: jtt_tree.NumberTreeNode) -> None:
-        """
-        Add the node to the results if the path is empty.
-        Otherwise, evaluate according to the query.
-        """
-        if not self.op_queue:
-            self.results.append(node)
-            return
-        self.results.extend(self._process_op(node))
-
-    def visit_boolean_node(self, node: jtt_tree.BooleanTreeNode) -> None:
-        """
-        Add the node to the results if the path is empty.
-        Otherwise, evaluate according to the query.
-        """
-        if not self.op_queue:
-            self.results.append(node)
-            return
-        self.results.extend(self._process_op(node))
-
-    def visit_array_node(self, node: jtt_tree.ListTreeNode) -> None:
-        """
-        Add the node to the results if the path is empty.
-        Otherwise, evaluate according to the query, and then recurse on each result.
-        """
-        if not self.op_queue:
-            self.results.append(node)
-            return
-        for child in self._process_op(node):
-            new_query = self.copy_query_to_new_node(child)
-            self.results.extend(new_query.collect_results())
-
-    def visit_object_node(self, node: jtt_tree.ObjectTreeNode) -> None:
-        """
-        Add the node to the results if the path is empty.
-        Otherwise, evaluate according to the query, and then recurse on each result.
-        """
-        if not self.op_queue:
-            self.results.append(node)
-            return
-        for child in self._process_op(node):
-            new_query = self.copy_query_to_new_node(child)
-            self.results.extend(new_query.collect_results())
-
-
-class TreeQuery(NodeQuery):
-
-    """
-    This class is used to build and evaluate queries against JSON objects.
+    This class is used to represent the current position in the tree during query processing.
     """
 
-    def filter_key(self, predicate: str, strict: bool = False) -> "TreeQuery":
-        self.op_queue.append(operations.FilterKey(predicate, strict=strict))
-        return self
+    node: Optional[jtt_tree.TreeNode]
 
-    def filter_index(self, index: int, strict: bool = False) -> "TreeQuery":
-        self.op_queue.append(operations.FilterIndex(index, strict=strict))
-        return self
+    def __init__(self) -> None:
+        self.node = None
 
-    def get_all(self, strict: bool = False) -> "TreeQuery":
-        self.op_queue.append(operations.GetAll(strict=strict))
-        return self
+    def visit(self, node: jtt_tree.TreeNode) -> None:
+        """
+        Move the cursor to the specified node.
+
+        Args:
+            node: The TreeNode to move the cursor to.
+        """
+        self.node = node
+
+
+class QueryProcessor:
+    """
+    This class is used to evaluate queries against TreeNode objects.
+    """
+
+    operation_chain: operations.QueryOperationChain
+    result_tree: jtt_tree.TreeNode
+    read_tree: jtt_tree.TreeNode
+    cursor: Cursor
+
+    def __init__(
+        self, tree: jtt_tree.TreeNode, operation_chain: operations.QueryOperationChain
+    ) -> None:
+        self.read_tree = tree
+        self.result_tree = None
+        self.operation_chain = operation_chain
+        self.cursor = Cursor()
+        self.cursor.visit(self.read_tree)
+
+    def execute(self) -> jtt_tree.TreeNode:
+        """
+        Execute the query operations and store the result in the result_tree attribute.
+        """
+        for operation in self.operation_chain:
+            self.cursor.visit(operation.perform(self.cursor.node))
+            if not self.cursor.node:
+                self.result_tree = jtt_tree.NullTreeNode()
+                return self.result_tree
+
+        self.result_tree = self.cursor.node
+        return self.result_tree

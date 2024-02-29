@@ -38,8 +38,11 @@ class TreeNode:
     def __repr__(self) -> str:
         return TreeNode.repr_object.repr(self.value)
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        pass
+    def serialize(self) -> typing.Any:
+        """
+        Serialize the object tree into a dictionary.
+        """
+        return self.value
 
 
 class NullTreeNode(TreeNode):
@@ -49,9 +52,6 @@ class NullTreeNode(TreeNode):
         self.value = None
         self.descendant_count = 0
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_null_node(self)
-
 
 class StringTreeNode(TreeNode):
     type = NodeType.STRING
@@ -59,9 +59,6 @@ class StringTreeNode(TreeNode):
     def __init__(self, value: str):
         self.value = value
         self.descendant_count = 0
-
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_string_node(self)
 
 
 class NumberTreeNode(TreeNode):
@@ -71,9 +68,6 @@ class NumberTreeNode(TreeNode):
         self.value = value
         self.descendant_count = 0
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_number_node(self)
-
 
 class BooleanTreeNode(TreeNode):
     type = NodeType.BOOLEAN
@@ -82,11 +76,9 @@ class BooleanTreeNode(TreeNode):
         self.value = value
         self.descendant_count = 0
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_boolean_node(self)
-
 
 class ListTreeNode(TreeNode):
+    value: typing.List[TreeNode]
     type = NodeType.ARRAY
 
     def __init__(self, value: typing.List[TreeNode]):
@@ -109,11 +101,15 @@ class ListTreeNode(TreeNode):
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
             self.descendant_count += self.value[-1].descendant_count + 1
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_array_node(self)
+    def serialize(self) -> typing.List[typing.Any]:
+        """
+        Serialize the object tree into a list.
+        """
+        return [v.serialize() for v in self.value]
 
 
 class ObjectTreeNode(TreeNode):
+    value: typing.Dict[str, TreeNode]
     type = NodeType.OBJECT
 
     def __init__(self, value: typing.Dict[str, TreeNode]):
@@ -136,35 +132,11 @@ class ObjectTreeNode(TreeNode):
                 raise TypeError(f"Invalid type: {type(v)} for value {v}")
             self.descendant_count += self.value[k].descendant_count + 1
 
-    def accept_visitor(self, visitor: "NodeVisitor") -> None:
-        visitor.visit_object_node(self)
-
-
-class NodeVisitor:
-
-    """
-    Visitor pattern for tree nodes.
-    """
-
-    tree: TreeNode
-
-    def visit_null_node(self, node: NullTreeNode) -> None:
-        pass
-
-    def visit_string_node(self, node: StringTreeNode) -> None:
-        pass
-
-    def visit_number_node(self, node: NumberTreeNode) -> None:
-        pass
-
-    def visit_boolean_node(self, node: BooleanTreeNode) -> None:
-        pass
-
-    def visit_array_node(self, node: ListTreeNode) -> None:
-        pass
-
-    def visit_object_node(self, node: ObjectTreeNode) -> None:
-        pass
+    def serialize(self) -> typing.Dict[str, typing.Any]:
+        """
+        Serialize the object tree into a dictionary.
+        """
+        return {k: v.serialize() for k, v in self.value.items()}
 
 
 def create_tree(data: typing.Dict[str, typing.Any]) -> ObjectTreeNode:
